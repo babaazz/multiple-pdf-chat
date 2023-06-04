@@ -42,6 +42,19 @@ def chat(vectorstore):
         retriever=vectorstore.as_retriever(),
         memory=memory    
     )
+    return conversation_chain
+
+def handle_user_input(user_input):
+    response = sl.session_state.conversation({"question": user_input})
+    sl.session_state.chat_history = response["chat_history"]
+
+    for i, message in enumerate(sl.session_state.chat_history):
+        if i % 2 == 0:
+            sl.write(user_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
+
+        else:
+            sl.write(bot_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
+
     
     
 
@@ -49,11 +62,18 @@ def main():
     load_dotenv()
     sl.set_page_config(page_title="chat with mutiple pdfs", page_icon=":books:")
 
+    sl.write(css, unsafe_allow_html=True)
+
     if "conversation" not in sl.session_state:
         sl.session_state.conversation = None
+    
+    if "chat_history" not in sl.session_state:
+        sl.session_state.chat_histroy = None
 
     sl.header("Chat with mutiple pdfs :books:")
-    sl.text_input("Ask a question about your document")
+    user_input = sl.text_input("Ask a question about your document")
+    if(user_input):
+        handle_user_input(user_input)
 
     with sl.sidebar:
         sl.subheader("Your Documents")
