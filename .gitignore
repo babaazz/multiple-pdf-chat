@@ -1,6 +1,9 @@
 # C extensions
 *.so
 
+# Environment variaable
+.env
+
 # Distribution / packaging
 venv/
 bin/
